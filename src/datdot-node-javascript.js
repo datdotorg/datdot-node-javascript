@@ -8,8 +8,8 @@ const logkeeper = require('datdot-service/src/node_modules/datdot-logkeeper')
 const storage_report_codec = require('datdot-service/src/node_modules/datdot-codec/storage-report')
 const proof_codec = require('datdot-service/src/node_modules/datdot-codec/proof')
 
-const makeSets = require('_makeSets')
-const PriorityQueue = require('_priority-queue')
+const makeSets = require('datdot-node-javascript/_makeSets')
+const PriorityQueue = require('datdot-node-javascript/_priority-queue')
 
 const DB = require('./DB')
 const blockgenerator = require('./scheduleAction.js')
@@ -39,7 +39,7 @@ async function init () {
   const log = await logkeeper(name, logport)
   const wss = new WebSocket.Server({ port: PORT }, after)
   function after () {
-    log({ type: 'chain', data: `running on http://localhost:${wss.address().port}` })
+    log({ type: 'chain', data: `running on http://${host}:${wss.address().port}` })
   }
   const scheduler = blockgenerator({ blockinterval, intrinsics }, log.sub('blockgenerator'), async blockMessage => {
     const { number, startTime } = blockMessage.data
