@@ -4,7 +4,7 @@
   "description": "datdot nodejs chain server",
   "main": "./src/datdot-node-javascript.js",
   "scripts": {
-    "start": "node start.js",
+    "start": "DEBUG=* node start.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

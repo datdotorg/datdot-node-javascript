@@ -37,7 +37,6 @@ async function init () {
   const [host, PORT] = config.chain
   const name = `chain`
   const log = await logkeeper(name, logport)
-  console.log({logport, log})
   const wss = new WebSocket.Server({ port: PORT }, after)
   function after () {
     log({ type: 'chain', data: `running on http://localhost:${wss.address().port}` })
