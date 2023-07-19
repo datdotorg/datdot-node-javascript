@@ -2,9 +2,9 @@
   "name": "datdot-node-javascript",
   "version": "0.0.1-pre-alpha",
   "description": "datdot nodejs chain server",
-  "main": "datdot-node-javascript.js",
-  "devDependencies": {},
+  "main": "./src/datdot-node-javascript.js",
   "scripts": {
+    "start": "node start.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,5 +22,12 @@
   "bugs": {
     "url": "https://github.com/datdotorg/datdot-node-javascript/issues"
   },
-  "homepage": "https://github.com/datdotorg/datdot-node-javascript#readme"
+  "homepage": "https://github.com/datdotorg/datdot-node-javascript#readme",
+  "dependencies": {
+    "b4a": "^1.6.4",
+    "cross-spawn": "^7.0.3",
+    "datdot-service": "github:datdotorg/datdot-service",
+    "varint": "^6.0.0",
+    "ws": "^8.13.0"
+  }
 }

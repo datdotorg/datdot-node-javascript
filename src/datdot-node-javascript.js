@@ -3,10 +3,10 @@ const WebSocket = require('ws')
 
 const { performance } = require('perf_hooks')
 
-const datdot_crypto = require('datdot-crypto')
-const logkeeper = require('datdot-logkeeper')
-const storage_report_codec = require('datdot-codec/storage-report')
-const proof_codec = require('datdot-codec/proof')
+const datdot_crypto = require('datdot-service/src/node_modules/datdot-crypto')
+const logkeeper = require('datdot-service/src/node_modules/datdot-logkeeper')
+const storage_report_codec = require('datdot-service/src/node_modules/datdot-codec/storage-report')
+const proof_codec = require('datdot-service/src/node_modules/datdot-codec/proof')
 
 const makeSets = require('_makeSets')
 const PriorityQueue = require('_priority-queue')
@@ -37,6 +37,7 @@ async function init () {
   const [host, PORT] = config.chain
   const name = `chain`
   const log = await logkeeper(name, logport)
+  console.log({logport, log})
   const wss = new WebSocket.Server({ port: PORT }, after)
   function after () {
     log({ type: 'chain', data: `running on http://localhost:${wss.address().port}` })
