@@ -2,7 +2,7 @@
   "name": "datdot-node-javascript",
   "version": "0.0.1-pre-alpha",
   "description": "datdot nodejs chain server",
-  "main": "./src/datdot-node-javascript.js",
+  "main": "./start.js",
   "scripts": {
     "start": "DEBUG=* node start.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,6 +17,9 @@
     "dat",
     "hypercore"
   ],
+  "engines": {
+    "node": "16.x"
+  },
   "author": "ninabreznik, serapath",
   "license": "MIT",
   "bugs": {
