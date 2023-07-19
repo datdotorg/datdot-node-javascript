@@ -1,0 +1,26 @@
+{
+  "name": "datdot-node-javascript",
+  "version": "0.0.1-pre-alpha",
+  "description": "datdot nodejs chain server",
+  "main": "datdot-node-javascript.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/datdotorg/datdot-node-javascript.git"
+  },
+  "keywords": [
+    "datdot",
+    "chain",
+    "dat",
+    "hypercore"
+  ],
+  "author": "ninabreznik, serapath",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/datdotorg/datdot-node-javascript/issues"
+  },
+  "homepage": "https://github.com/datdotorg/datdot-node-javascript#readme"
+}
