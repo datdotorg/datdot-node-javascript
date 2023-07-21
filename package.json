@@ -2,7 +2,6 @@
   "name": "datdot-node-javascript",
   "version": "0.0.1-pre-alpha",
   "description": "datdot nodejs chain server",
-  "main": "./src/datdot-node-javascript.js",
   "scripts": {
     "start": "node start.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,6 +17,7 @@
     "hypercore"
   ],
   "exports": {
+    ".": "./src/datdot-node-javascript.js",
     "./*": "./src/modules/*.js"
   },
   "engines": {
