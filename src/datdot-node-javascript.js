@@ -15,7 +15,7 @@ const DB = require('./DB')
 const blockgenerator = require('./scheduleAction.js')
 const b4a = require('b4a')
 
-const { io } = vault
+const { io } = globalThis.vault
 
 const queries = {
   getItemByID,

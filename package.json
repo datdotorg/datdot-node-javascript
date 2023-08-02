@@ -18,6 +18,7 @@
   ],
   "exports": {
     ".": "./src/datdot-node-javascript.js",
+    "./start.js": "./start.js",
     "./*": "./src/modules/*.js"
   },
   "engines": {

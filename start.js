@@ -48,7 +48,7 @@ const { login } = require('datdot-service/src/node_modules/datdot-vault')
 /*************************************
  VAULT USE
 *************************************/
-const { io } = vault 
+const { io } = globalThis.vault 
 // { const { id, on, db, at } = { io, db, id } = vault }
 const at1 = io('livereload', function on (message) {
   console.log('@TODO: livereload')
@@ -135,8 +135,8 @@ function onhttp (stream, info) { // onopen
 /**************************************
   START
 *************************************/
-const { createServer } = require('http')
-const { WebSocketServer } = require('ws')
+// const { createServer } = require('http')
+// const { WebSocketServer } = require('ws')
 /**************************************
   CONFIGURE CHAIN NODE
     glitch port    : 3000
@@ -146,104 +146,110 @@ const { WebSocketServer } = require('ws')
 process.env.DEBUG = '*,-hypercore-protocol'
 const port = process.env.PORT || 8080
 const host = '0.0.0.0' // '127.0.0.1' || process.env.HOST_ADDRESS
+console.log('PORT:', process.env.PORT)
 
 const logport = 9001
 console.log('HOST+PORT', process.env.HOST_ADDRESS, process.env.PORT)
 if (process.env.DEBUG) console.log('DEBUG', process.env.DEBUG)
-const json = JSON.stringify({
-  chain: [process.env.HOST_ADDRESS || '0.0.0.0', 3399]
-})
-const [flag] = process.argv.slice(2)
+const [
+  flag,
+  json = JSON.stringify({
+    chain: [process.env.HOST_ADDRESS || '0.0.0.0', 3399]
+  })
+] = process.argv.slice(2)
 console.log({flag})
+console.log({json})
 process.argv.push(json, logport)
 /**************************************
   LAUNCH CHAIN NODE
 *************************************/
 const script = require('datdot-node-javascript/devtools')
 const init = require('datdot-node-javascript')
+const webserver = require('datdot-node-javascript/webserver')
 init(JSON.parse(json))
 
-
+webserver({ host, port, flag })
 
 LESEZEICHEN: `@TODO: fix shit! 2`
 
 
-const wss = new WebSocketServer({ noServer: true })
-wss.on('connection', onconnection)
-function onconnection (ws, request) {
-  const { url: path } = request
-  console.log('CONNECTION', { path }) // log
-  // const send = protocol(message => ws.send(message))
+// const wss = new WebSocketServer({ noServer: true })
+// wss.on('connection', onconnection)
+// function onconnection (ws, request) {
+//   const { url: path } = request
+//   console.log('CONNECTION', { path }) // log
+//   // const send = protocol(message => ws.send(message))
 
-  // const send = io.to(path, message => {
-  //   // @TODO: THINK HOW DOES IT REALLY WORK?!?
-  //   // 1. create logkeeper listener with websocket intention
-  // })
+//   // const send = io.to(path, message => {
+//   //   // @TODO: THINK HOW DOES IT REALLY WORK?!?
+//   //   // 1. create logkeeper listener with websocket intention
+//   // })
 
-  io.to(path, { ws, request })
+//   io.to(path, { ws, request })
   
-  // const { id, name, stack, fn: protocol } = ROUTES[path]
-  // const { protocol } = ws
-  // ws.on('open', event => send(event))
-  // ws.on('error', event => send(event))
-  // ws.on('close', event => send(event))
-  // ws.on('message', event => send(event))
-}
-// --------------------------------------------------------------------------
-const server = createServer(handlerX) // HANDLER syscall
-server.on('upgrade', onupgrade)      // ONUPGRADE syscall
+//   // const { id, name, stack, fn: protocol } = ROUTES[path]
+//   // const { protocol } = ws
+//   // ws.on('open', event => send(event))
+//   // ws.on('error', event => send(event))
+//   // ws.on('close', event => send(event))
+//   // ws.on('message', event => send(event))
+// }
+// // --------------------------------------------------------------------------
+// const server = createServer(handlerX) // HANDLER syscall
+// server.on('upgrade', onupgrade)      // ONUPGRADE syscall
 
-function handlerX (request, response) {
-  const { url } = request
-  const info = {}
-  // const info = {
-  //   publickey,
-  //   topics,
-  //   prioritized,
-  //   ban(status = true)
-  // }
-  // const stream = io.to('http', info)
-  // request.pipe(stream).pipe(response)
-  io.to(url, { request, response })
-}
-server.listen(port, host, onlisten) 
-process.on('SIGINT', onterminate)
-/************************************/
-async function onupgrade (request, socket, head) {
-  socket.on('error', onerror)
-  try { await authenticate(request) } catch (error) {
-    console.error('ERROR', error)
-    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
-    socket.destroy()
-  }
-  socket.removeListener('error', onerror)
-  const { url } = request
+// function handlerX (request, response) {
+//   const { url } = request
+//   const info = {}
+//   // const info = {
+//   //   publickey,
+//   //   topics,
+//   //   prioritized,
+//   //   ban(status = true)
+//   // }
+//   // const stream = io.to('http', info)
+//   // request.pipe(stream).pipe(response)
+//   io.to(url, { request, response })
+// }
+// server.listen(port, host, onlisten) 
+// process.on('SIGINT', onterminate)
+// /************************************/
+// async function onupgrade (request, socket, head) {
+//   socket.on('error', onerror)
+//   try { await authenticate(request) } catch (error) {
+//     console.error('ERROR', error)
+//     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
+//     socket.destroy()
+//   }
+//   socket.removeListener('error', onerror)
+//   const { url } = request
 
-  // try {
-  //   io.to(url, { request, response })
-  // } catch (error) {
-  // }
-  // const on = ROUTES[url] // @TODO: ...
-  if (io.has(url)) return wss.handleUpgrade(request, socket, head, ws => {
-    wss.emit('connection', ws, request)
-  })
-  socket.write('HTTP/1.1 404 Not Found\r\n\r\n')
-  socket.destroy()
-}
-function onlisten () {
-  const { address, family, port } = server.address()
-  const url = `http://${address}:${port}`
-  console.log('webserver listening on', url)
-  if (flag !== 'open') return
-  const command = `${{ darwin: 'open', win32: 'start' }[process.platform] || 'xdg-open'/*linux*/} ${url}`
-  require('child_process').exec(command)
-}
-function onterminate () {
-  console['log']("\n Terminating all processes")
-  process.exit()
-}
-function onerror (error) { console.log('[ws]:error>', error) }
-function authenticate (request) { return request }
+//   // try {
+//   //   io.to(url, { request, response })
+//   // } catch (error) {
+//   // }
+//   // const on = ROUTES[url] // @TODO: ...
+//   if (io.has(url)) return wss.handleUpgrade(request, socket, head, ws => {
+//     wss.emit('connection', ws, request)
+//   })
+//   socket.write('HTTP/1.1 404 Not Found\r\n\r\n')
+//   socket.destroy()
+// }
+// function onlisten () {
+//   const { address, family, port } = server.address()
+//   const url = `http://${address}:${port}`
+//   console.log('webserver listening on', url)
+//   if (flag !== 'open') return
+//   const command = `${{ darwin: 'open', win32: 'start' }[process.platform] || 'xdg-open'/*linux*/} ${url}`
+//   require('child_process').exec(command)
+// }
+// function onterminate () {
+//   console['log']("\n Terminating all processes")
+//   process.exit()
+// }
+// function onerror (error) { console.log('[ws]:error>', error) }
+// function authenticate (request) { return request }
+
 function handler ({ request, response }) {
   const { url } = request
   console.log('[http]', url)
