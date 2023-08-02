@@ -15,33 +15,55 @@ const DB = require('./DB')
 const blockgenerator = require('./scheduleAction.js')
 const b4a = require('b4a')
 
+const { io } = vault
 
+const queries = {
+  getItemByID,
+  getFeedByID,
+  getFeedByKey,
+  getUserByID,
+  getUserIDByNoiseKey,
+  getUserIDBySigningKey,
+  getPlanByID,
+  getAmendmentByID,
+  getContractByID,
+  getStorageChallengeByID,
+  getPerformanceChallengeByID,
+}
+const intrinsics = { 
+  plan_execution, 
+  amendment_timeout, 
+  make_storage_challenge, 
+  make_performance_challenge, 
+  storage_challenge_timeout,
+  performance_challenge_timeout,
+}
+
+const header = { number: 0 }
+const connections = {}
+const setSize = 10 // every contract is for hosting 1 set = 10 chunks
+const size = setSize * 64 //assuming each chunk is 64kb
+const blockinterval = 5000 // in miliseconds
 const priority_queue = PriorityQueue(compare)
 function compare (item) { return item }
-const blockinterval = 5000 // in miliseconds
-var header = { number: 0 }
-const scheduler = init()
-const connections = {}
+
 var eventpool = []
 var mempool = []
+var scheduler
+module.exports = init
+// init()
 
-
-const setSize = 10 // every contract is for hosting 1 set = 10 chunks
-const size = setSize*64 //assuming each chunk is 64kb
-const blockTime = 6000
-
-
-async function init () {
-  const [json, logport] = process.argv.slice(2)
-  const config = JSON.parse(json)
-  const [host, PORT] = config.chain
+async function init (config) {
+  const [host, port] = config.chain
   const name = `chain`
-  const log = await logkeeper(name, logport)
-  const wss = new WebSocket.Server({ port: PORT }, after)
-  function after () {
-    log({ type: 'chain', data: `running on http://${host}:${wss.address().port}` })
-  }
-  const scheduler = blockgenerator({ blockinterval, intrinsics }, log.sub('blockgenerator'), async blockMessage => {
+
+
+  LESEZEICHEN: `@TODO: fix shit! 1`
+  // generate `logkeeper`
+  // => provide `port` because we want it to listen
+
+  const log = await logkeeper(name, { path: '/logs', port })
+  scheduler = blockgenerator({ blockinterval, intrinsics }, log.sub('blockgenerator'), async blockMessage => {
     const { number, startTime } = blockMessage.data
     const currentBlock = header.number = number
     const temp = [...mempool]
@@ -80,11 +102,40 @@ async function init () {
       log({ type: 'current-block', data: currentBlock })
     }
   })
-  wss.on('connection', function connection (ws, req) {
+  // --------------------------------------------------------------------------
+  // LESEZEICHEN3: '@TODO: ...'
+  // const wss = new WebSocket.Server({ path: '/', port }, after)
+  // function after () {
+  //   log({ type: 'chain', data: `running on http://${host}:${wss.address().port}` })
+  // }
+  // wss.on('connection', onconnection)
+  const on = {
+    fail: event => {},
+    open: event => {},
+    data: event => {},
+    exit: event => {},
+  }
+  // this connects, but await only resolves when connection is established
+  // => but if ocnnection breaks, send will fail!
+  // => or send is append!
+  // => 
+  const node = await io(name, ({ ws, request }) => {
+    onconnection(ws, request)
+  })
+  // const node = await io(name, ({ type, data }) => on[type](data))
+  // const { send } = node
+  log({ type: 'connection' })
+  // --------------------------------------------------------------------------
+  function onconnection (ws, req) {
     const ip = req.socket.remoteAddress
     const port = req.socket.remotePort
     log({ type: 'connection-from', data: { ip, port } })
-    ws.on('message', async function incoming (message) {
+    ws.on('message', onmessage)
+    ws.on('open', onopen)
+    ws.on('error', onerror)
+    ws.on('close', onclose)
+  // --------------------------------------------------------------------------
+    async function onmessage (message) {
       var { flow, type, data } = JSON.parse(message)
       const [from, id] = flow
       // log({ type: 'extrinsic', data: { type, flow, messsage: JSON.parse(message) } })
@@ -116,18 +167,18 @@ async function init () {
           })
       })
       }
-    })
-    ws.on('open', function open () {
+    }
+    function onopen () {
       log('======= OPEN =======')
-    })
-    ws.on('error', function error (err) {
-      log('======= OPEN =======')
+    }
+    function onerror (err) {
+      log('======= ERROR =======')
       log(err)
-    })
-    ws.on('close', function close () {
+    }
+    function onclose () {
       log('[ERROR] unexpected closing of chain connection for', name)
-    })
-  })
+    }
+  }
   /******************************************************************************
     ROUTING (sign & send)
   ******************************************************************************/
@@ -178,7 +229,6 @@ async function init () {
     }))
     // return
   }
-  return scheduler
 }
 
 function messageVerifiable (message) {
@@ -187,20 +237,6 @@ function messageVerifiable (message) {
 /******************************************************************************
   QUERIES
 ******************************************************************************/
-const queries = {
-  getItemByID,
-  getFeedByID,
-  getFeedByKey,
-  getUserByID,
-  getUserIDByNoiseKey,
-  getUserIDBySigningKey,
-  getPlanByID,
-  getAmendmentByID,
-  getContractByID,
-  getStorageChallengeByID,
-  getPerformanceChallengeByID,
-}
-
 // function getFeedByID (id) { return DB.feeds[id] }
 // function getUserByID (id) { return DB.users[id] }
 // function getPlanByID (id) { return DB.plans[id] }
@@ -234,15 +270,6 @@ function getUserIDBySigningKey(key) {
 /******************************************************************************
   SCHEDULABLE INTRINSICS
 ******************************************************************************/
-const intrinsics = { 
-  plan_execution, 
-  amendment_timeout, 
-  make_storage_challenge, 
-  make_performance_challenge, 
-  storage_challenge_timeout,
-  performance_challenge_timeout,
- }
-
 async function plan_execution (log, data) {
   const { contract_id } = data
   const reuse = { encoders: [], attesters: [], hosters: [] }
